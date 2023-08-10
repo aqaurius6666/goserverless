@@ -58,7 +58,7 @@ export EMPTY_BUCKET_SCRIPT
 
 handlers := $(wildcard ./handler/*)
 build: $(handlers)
-	for handler in ${handlers}; \
+	@ for handler in ${handlers}; \
 	do \
 		$(GOBUILD_CMD) -o .build/$$handler $$handler; \
 	done;
@@ -98,9 +98,7 @@ real-cleanup:
 	@ aws cloudformation delete-stack --stack-name ${project}-${stage}
 	@ aws s3api delete-bucket --bucket ${deployment_bucket} || true
 
-real-deploy:
-	@ export $(grep -v '^#' .env | xargs) > /dev/null
-	@ echo "Import env variables from .env"
+real-deploy: build merge-yaml
 	@ echo "Deploying serverless stage ${stage}"
 	@ sls deploy --stage ${stage} --verbose
 

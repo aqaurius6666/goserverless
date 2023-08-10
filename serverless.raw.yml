@@ -55,7 +55,7 @@ package:
     - '!./**'
     - ./.build/**
 
-functions: !include handler/handler.yml
+functions: !include handler.yml
   
 # you can add CloudFormation resource templates here
 resources:
