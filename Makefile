@@ -84,8 +84,14 @@ endef
 export MERGE_YAML_SCRIPT
 
 merge-yaml:
+	@ echo "Merging serverless.raw.yml"
+	@ echo "You need install python3 and pyyaml-include to run this command"
 	@ python3 -c "$$MERGE_YAML_SCRIPT" serverless.raw.yml > serverless.yml
 
+gen-wire:
+	@ echo "Generating wire files"
+	@ echo "You need install wire by running command 'go install github.com/google/wire/cmd/wire@latest'"
+	@ wire ./...
 
 deploy deploy-function cleanup: %: real-%
 	@ echo "================ Make $@ action done in $$(($$(date +%s) - ${start_time})) seconds"

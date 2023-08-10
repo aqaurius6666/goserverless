@@ -25,8 +25,8 @@ provider:
   runtime: go1.x
 resources:
   Resources:
-    NewResource:
+    Bucket:
       Properties:
-        BucketName: my-new-bucket
+        BucketName: ${aws:accountId}-${sls:stage}-${self:service}-bucket
       Type: AWS::S3::Bucket
 service: goserverless

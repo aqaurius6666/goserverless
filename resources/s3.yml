@@ -1,4 +1,4 @@
-NewResource:
+Bucket:
   Type: AWS::S3::Bucket
   Properties:
-    BucketName: my-new-bucket
+    BucketName: ${aws:accountId}-${sls:stage}-${self:service}-bucket
