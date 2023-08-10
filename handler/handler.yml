@@ -1,0 +1,12 @@
+postEcho:
+  handler: .build/handler/postEcho
+  events:
+    - httpApi:
+        path: /echo
+        method: post
+getEcho:
+  handler: .build/handler/getEcho
+  events:
+    - httpApi:
+        path: /echo
+        method: get
