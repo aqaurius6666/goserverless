@@ -23,7 +23,8 @@ plugins:
 
 provider:
   name: aws
-  runtime: go1.x
+  architecture: arm64
+  runtime: provided.al2
   region: ap-southeast-1
   iam:
     role:
@@ -34,9 +35,7 @@ provider:
   environment:
     DYNAMODB_TABLE_NAME: ${self:custom.resourceNames.dynamodbTable}
 package:
-  patterns:
-    - '!./**'
-    - ./.build/**
+  individually: true
 custom:
   resourceNames:
     # Lambda function

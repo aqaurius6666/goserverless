@@ -22,6 +22,8 @@ functions:
     handler: .build/handler/getEcho
     memorySize: 256
     name: ${self:custom.resourceNames.getEcho}
+    package:
+      artifact: .build/getEcho.zip
   postEcho:
     events:
     - httpApi:
@@ -30,13 +32,14 @@ functions:
     handler: .build/handler/postEcho
     memorySize: 256
     name: ${self:custom.resourceNames.postEcho}
+    package:
+      artifact: .build/postEcho.zip
 package:
-  patterns:
-  - '!./**'
-  - ./.build/**
+  individually: true
 plugins:
 - serverless-deployment-bucket
 provider:
+  architecture: arm64
   deploymentBucket:
     name: ${self:custom.resourceNames.deploymentBucket}
   environment:
@@ -61,7 +64,7 @@ provider:
         Sid: SpecificTable
   name: aws
   region: ap-southeast-1
-  runtime: go1.x
+  runtime: provided.al2
 resources:
   Resources:
     dynamodbTable:

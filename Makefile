@@ -22,9 +22,9 @@ table := $(shell echo "${stage}-${project}-table")
 
 
 GOBINARY := go
-GOARCH := amd64
+GOARCH := arm64
 GOOS := linux
-GOBUILDFLAGS := -ldflags="-s -w"
+GOBUILDFLAGS := -ldflags="-s -w" -tags lambda.norpc
 GOBUILD_CMD := 
 ifneq (${GOARCH},)
 GOBUILD_CMD := $(GOBUILD_CMD) GOARCH=$(GOARCH)
@@ -60,7 +60,7 @@ handlers := $(wildcard ./handler/*)
 build: gen-wire $(handlers)
 	@ for handler in ${handlers}; \
 	do \
-		$(GOBUILD_CMD) -o .build/$$handler $$handler; \
+		$(GOBUILD_CMD) -o .build/$$handler/bootstrap $$handler; \
 	done;
 
 define MERGE_YAML_SCRIPT
@@ -88,6 +88,16 @@ merge-yaml:
 	@ echo "You need install python3 and pyyaml-include to run this command"
 	@ python3 -c "$$MERGE_YAML_SCRIPT" serverless.raw.yml > serverless.yml
 
+package: build
+	@ echo "Packaging serverless stage ${stage}"
+	@ mkdir -p .serverless
+	@ for handler in ${handlers}; \
+	do \
+		handler=$$(echo $$handler | sed 's/^\.\///'); \
+		handlerName=$$(echo $$handler | sed 's/handler\///'); \
+		rm .build/$$handlerName.zip 2> /dev/null; \
+		zip -j .build/$$handlerName.zip .build/$$handler/bootstrap > /dev/null; \
+	done;
 gen-wire:
 	@ echo "Generating wire files"
 	@ echo "You need install wire by running command 'go install github.com/google/wire/cmd/wire@latest'"
@@ -104,7 +114,7 @@ real-cleanup:
 	@ aws cloudformation delete-stack --stack-name ${project}-${stage}
 	@ aws s3api delete-bucket --bucket ${deployment_bucket} || true
 
-real-deploy: build merge-yaml
+real-deploy: package merge-yaml
 	@ echo "Deploying serverless stage ${stage}"
 	@ sls deploy --stage ${stage} --verbose
 

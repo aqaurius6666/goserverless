@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"os"
 
 	"github.com/aqaurius6666/goserverless/internal/repository/dynamodb"
+	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
@@ -12,17 +14,34 @@ type CtxKey string
 
 var LambdaDepsCtxKey CtxKey = "deps"
 
-type event struct {
+type requestBody struct {
 	Name string `json:"name"`
 }
 
-func handler(ctx context.Context, e event) error {
+func handler(ctx context.Context, e events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	var (
+		body requestBody
+		err  error
+	)
 	deps := ctx.Value(LambdaDepsCtxKey).(LambdaDeps)
-	err := deps.UserUseCase.CreateUser(ctx, "test")
-	if err != nil {
-		return err
+	if err = json.Unmarshal([]byte(e.Body), &body); err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: 400,
+			Body:       err.Error(),
+		}, nil
 	}
-	return nil
+
+	err = deps.UserUseCase.CreateUser(ctx, body.Name)
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: 400,
+			Body:       err.Error(),
+		}, nil
+	}
+	return events.APIGatewayProxyResponse{
+		StatusCode: 200,
+		Body:       "ok",
+	}, nil
 }
 
 func main() {

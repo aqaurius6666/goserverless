@@ -32,7 +32,8 @@ func (u *UserUseCaseImpl) GetUserById(ctx context.Context, id string) (*entity.U
 
 func (u *UserUseCaseImpl) CreateUser(ctx context.Context, id string) error {
 	return u.UserRepo.CreateUser(ctx, &entity.User{
-		Sk: id,
-		Pk: id,
+		Sk:   id,
+		Pk:   id,
+		Name: id,
 	})
 }

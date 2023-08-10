@@ -23,7 +23,7 @@ func BuildDeps(opts LambdaOpts) (LambdaDeps, error) {
 		dynamodb.UserSet,
 		dynamodb.DdbSet,
 		wire.Struct(new(LambdaDeps), "*"),
-		wire.FieldsOf(new(LambdaOpts), "DdbTableName"),
+		wire.FieldsOf(&opts, "DdbTableName"),
 	)
 	return LambdaDeps{}, nil
 }

@@ -1,5 +1,7 @@
 postEcho:
   handler: .build/handler/postEcho
+  package:
+    artifact: .build/postEcho.zip
   name: ${self:custom.resourceNames.postEcho}
   memorySize: 256
   events:
@@ -10,6 +12,8 @@ getEcho:
   handler: .build/handler/getEcho
   name: ${self:custom.resourceNames.getEcho}
   memorySize: 256
+  package:
+    artifact: .build/getEcho.zip
   events:
     - httpApi:
         path: /echo

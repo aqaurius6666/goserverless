@@ -2,6 +2,7 @@ package dynamodb
 
 import (
 	"context"
+	"errors"
 
 	"github.com/aqaurius6666/goserverless/internal/entity"
 	"github.com/aqaurius6666/goserverless/internal/usecase"
@@ -35,6 +36,9 @@ func (d *DdbUserRepository) GetUserById(ctx context.Context, id string) (*entity
 	})
 	if err != nil {
 		return nil, err
+	}
+	if output.Item == nil {
+		return nil, errors.New("not found")
 	}
 	var user entity.User
 	if err = attributevalue.UnmarshalMap(output.Item, &user); err != nil {
