@@ -2,6 +2,16 @@
 # All manual changes on this file will be overwritten.
 # You should edit serverless.raw.yml instead.
 # Run make merge-yaml to update this file.
+custom:
+  deploymentBucket:
+    blockPublicAccess: true
+    name: ${self:custom.resourceNames.deploymentBucket}
+  resourceNames:
+    deploymentBucket: ${aws:accountId}-${sls:stage}-${self:service}-deployment-bucket
+    dynamodbTable: ${sls:stage}-${self:service}-table
+    getEcho: ${sls:stage}-${self:service}-get-echo
+    lambdaExecutionRole: ${sls:stage}-${self:service}-lambda-execution-role
+    postEcho: ${sls:stage}-${self:service}-post-echo
 frameworkVersion: '3'
 functions:
   getEcho:
@@ -10,23 +20,65 @@ functions:
         method: get
         path: /echo
     handler: .build/handler/getEcho
+    memorySize: 256
+    name: ${self:custom.resourceNames.getEcho}
   postEcho:
     events:
     - httpApi:
         method: post
         path: /echo
     handler: .build/handler/postEcho
+    memorySize: 256
+    name: ${self:custom.resourceNames.postEcho}
 package:
   patterns:
   - '!./**'
   - ./.build/**
+plugins:
+- serverless-deployment-bucket
 provider:
+  deploymentBucket:
+    name: ${self:custom.resourceNames.deploymentBucket}
+  environment:
+    DYNAMODB_TABLE_NAME: ${self:custom.resourceNames.dynamodbTable}
+  iam:
+    role:
+      name: ${self:custom.resourceNames.lambdaExecutionRole}
+      statements:
+      - Action:
+        - dynamodb:BatchGetItem
+        - dynamodb:DescribeStream
+        - dynamodb:GetItem
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:BatchWriteItem
+        - dynamodb:DeleteItem
+        - dynamodb:UpdateItem
+        - dynamodb:PutItem
+        Effect: Allow
+        Resource:
+        - arn:aws:dynamodb:${aws:region}:${aws:accountId}:table/${self:custom.resourceNames.dynamodbTable}*
+        Sid: SpecificTable
   name: aws
+  region: ap-southeast-1
   runtime: go1.x
 resources:
   Resources:
-    Bucket:
+    dynamodbTable:
       Properties:
-        BucketName: ${aws:accountId}-${sls:stage}-${self:service}-bucket
-      Type: AWS::S3::Bucket
+        AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+        - AttributeName: sk
+          AttributeType: S
+        BillingMode: PAY_PER_REQUEST
+        KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+        - AttributeName: sk
+          KeyType: RANGE
+        PointInTimeRecoverySpecification:
+          PointInTimeRecoveryEnabled: false
+        TableName: ${self:custom.resourceNames.dynamodbTable}
+      Type: AWS::DynamoDB::Table
 service: goserverless

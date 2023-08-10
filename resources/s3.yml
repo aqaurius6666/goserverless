@@ -1,4 +1,0 @@
-Bucket:
-  Type: AWS::S3::Bucket
-  Properties:
-    BucketName: ${aws:accountId}-${sls:stage}-${self:service}-bucket

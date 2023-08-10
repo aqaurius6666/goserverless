@@ -1,5 +1,7 @@
 package entity
 
 type User struct {
-	Name string `json:"name"`
+	Pk   string `dynamodbav:"pk"`
+	Sk   string `dynamodbav:"sk"`
+	Name string `dynamodbav:"name"`
 }

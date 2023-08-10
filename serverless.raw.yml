@@ -18,48 +18,38 @@ service: goserverless
 # You can pin your service to only deploy with a specific Serverless version
 # Check out our docs for more details
 frameworkVersion: '3'
+plugins:
+  - serverless-deployment-bucket
 
 provider:
   name: aws
   runtime: go1.x
-
-# you can overwrite defaults here
-#  stage: dev
-#  region: us-east-1
-
-# you can add statements to the Lambda function's IAM Role here
-#  iam:
-#    role:
-#      statements:
-#        - Effect: "Allow"
-#          Action:
-#            - "s3:ListBucket"
-#          Resource: { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "ServerlessDeploymentBucket" } ] ]  }
-#        - Effect: "Allow"
-#          Action:
-#            - "s3:PutObject"
-#          Resource:
-#            Fn::Join:
-#              - ""
-#              - - "arn:aws:s3:::"
-#                - "Ref" : "ServerlessDeploymentBucket"
-#                - "/*"
-
-# you can define service wide environment variables here
-#  environment:
-#    variable1: value1
-
+  region: ap-southeast-1
+  iam:
+    role:
+      name: ${self:custom.resourceNames.lambdaExecutionRole}
+      statements: !include resources/lambda-execution-role-statements.yml
+  deploymentBucket:
+    name: ${self:custom.resourceNames.deploymentBucket}
+  environment:
+    DYNAMODB_TABLE_NAME: ${self:custom.resourceNames.dynamodbTable}
 package:
   patterns:
     - '!./**'
     - ./.build/**
-
+custom:
+  resourceNames:
+    # Lambda function
+    postEcho: ${sls:stage}-${self:service}-post-echo
+    getEcho: ${sls:stage}-${self:service}-get-echo
+    # AWS Resources
+    lambdaExecutionRole: ${sls:stage}-${self:service}-lambda-execution-role
+    dynamodbTable: ${sls:stage}-${self:service}-table
+    deploymentBucket: ${aws:accountId}-${sls:stage}-${self:service}-deployment-bucket
+  deploymentBucket:
+    name: ${self:custom.resourceNames.deploymentBucket}
+    blockPublicAccess: true
 functions: !include handler.yml
   
-# you can add CloudFormation resource templates here
 resources:
   Resources: !include resources/resources.yml
-#  Outputs:
-#     NewOutput:
-#       Description: "Description for the output"
-#       Value: "Some output value"

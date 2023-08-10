@@ -1,1 +1,2 @@
-!include resources/s3.yml
+# !include resources/s3.yml
+!include resources/dynamodb.yml

@@ -1,11 +1,15 @@
 postEcho:
   handler: .build/handler/postEcho
+  name: ${self:custom.resourceNames.postEcho}
+  memorySize: 256
   events:
     - httpApi:
         path: /echo
         method: post
 getEcho:
   handler: .build/handler/getEcho
+  name: ${self:custom.resourceNames.getEcho}
+  memorySize: 256
   events:
     - httpApi:
         path: /echo

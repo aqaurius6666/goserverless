@@ -57,7 +57,7 @@ endef
 export EMPTY_BUCKET_SCRIPT
 
 handlers := $(wildcard ./handler/*)
-build: $(handlers)
+build: gen-wire $(handlers)
 	@ for handler in ${handlers}; \
 	do \
 		$(GOBUILD_CMD) -o .build/$$handler $$handler; \
